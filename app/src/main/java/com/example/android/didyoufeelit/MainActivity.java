@@ -49,14 +49,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Perform the HTTP request for earthquake data and process the response.
-        Event earthquake = Utils.fetchEarthquakeData(USGS_REQUEST_URL);
 
-        // Update the information displayed to the user.
-        updateUi(earthquake);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        /* Create an {@link AsynTask} that takes in String URL as an input
+         * and performs and HTTP request of the given URL on the background
+         * then updates UI thread.
+         */
+
+        EarthquakeAsynTask task = new EarthquakeAsynTask();
+
+        /* Remember that parameters can be more than for execution.
+         * eg. task.execute(url1,url2,url3);
+         * We just have to modify our code in such a manner in doInBackground().
+         */
+        task.execute(USGS_REQUEST_URL);
     }
 
     @Override
@@ -99,12 +108,18 @@ public class MainActivity extends AppCompatActivity {
         client.disconnect();
     }
 
-    private class EarthquakeAsynTask extends AsyncTask<URL, Void, Event> {
-
-        protected Event doInBackground(URL... urls){
-
-
+    private class EarthquakeAsynTask extends AsyncTask<String, Void, Event> {
+        @Override
+        protected Event doInBackground(String... urls){
+            // Perform the HTTP request for earthquake data and process the response.
+            Event earthquake = Utils.fetchEarthquakeData(urls[0]);
+            return earthquake;
         }
+
+        protected void onPostExecute(Event earthquake){
+            updateUi(earthquake); //Updates the UI
+        }
+
     }
 
 
